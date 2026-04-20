@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mektuplar</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:#1a1a1a;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  font-family:'Playfair Display',serif;
+  transition:background 0.4s ease;
+}
+
+.notes-wrapper{
+  position:relative;
+  width:85vw;
+  max-width:450px;
+  height:65vh;
+}
+
+.sheet{
+  position:absolute;
+  inset:0;
+  background:#fdf5e6;
+  padding:35px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border-radius:4px;
+  cursor:pointer;
+  transition:1s ease;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+}
+
+#sheet-active{z-index:2;}
+#sheet-bg{z-index:1;opacity:0.7;transform:scale(0.95);}
+
+.text{
+  color:#2c1e14;
+  font-size:1.15rem;
+  font-style:italic;
+  line-height:1.7;
+}
+
+.pin{
+  position:absolute;
+  top:15px;
+  left:50%;
+  transform:translateX(-50%);
+  width:14px;
+  height:14px;
+  background:#8a2a2a;
+  border-radius:50%;
+}
+
+.torn-off{
+  transform:translateY(120vh) rotate(45deg) scale(0.6);
+  opacity:0;
+}
+
+/* pain mesaj */
+#pain-warning{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  color:#ffb3b3;
+  font-size:1.6rem;
+  opacity:0;
+  transition:0.4s;
+}
+
+/* final */
+#final{
+  position:absolute;
+  color:#b59b7c;
+  font-size:2rem;
+  opacity:0;
+}
+</style>
+</head>
+
+<body>
+
+<div id="pain-warning">Dur... acıtıyorsun.</div>
+
+<div class="notes-wrapper" id="wrapper">
+
+  <div class="sheet" id="sheet-bg">
+    <div class="pin"></div>
+    <div class="text" id="t-next"></div>
+  </div>
+
+  <div class="sheet" id="sheet-active">
+    <div class="pin"></div>
+    <div class="text" id="t-active"></div>
+  </div>
+
+</div>
+
+<div id="final">Daima masal gibi kal...</div>
+
+<script>
+const content=[
+  {text:"Bir şeyler başlamıştı...",type:"normal"},
+  {text:"Ama bazı şeyler acıtır...",type:"pain"},
+  {text:"Bazı kelimeler kalpte kalır.",type:"pain"},
+  {text:"elveda",type:"normal"}
+];
+
+let i=0;
+
+const active=document.getElementById("sheet-active");
+const tActive=document.getElementById("t-active");
+const tNext=document.getElementById("t-next");
+const warning=document.getElementById("pain-warning");
+const final=document.getElementById("final");
+
+tActive.innerText=content[0].text;
+tNext.innerText=content[1]?.text||"";
+
+let pain=0;
+let locked=false;
+let timeout=null;
+
+function triggerPain(){
+  if(locked) return;
+
+  if(navigator.vibrate) navigator.vibrate(100);
+
+  pain++;
+
+  document.body.style.background=
+  `linear-gradient(rgba(180,0,0,${pain*0.15}),rgba(180,0,0,${pain*0.15})),#1a1a1a`;
+
+  if(pain>=3){
+    locked=true;
+    warning.style.opacity="1";
+
+    setTimeout(()=>{
+      warning.style.opacity="0";
+      pain=0;
+      document.body.style.background="#1a1a1a";
+      locked=false;
+    },2000);
+
+    return;
+  }
+
+  clearTimeout(timeout);
+  timeout=setTimeout(()=>{
+    pain=Math.max(0,pain-1);
+    document.body.style.background="#1a1a1a";
+  },1000);
+}
+
+active.addEventListener("click",()=>{
+
+  if(locked) return;
+
+  if(content[i].type==="pain") triggerPain();
+
+  active.classList.add("torn-off");
+
+  setTimeout(()=>{
+
+    i++;
+
+    if(i<content.length){
+      tActive.innerText=content[i].text;
+      tNext.innerText=content[i+1]?.text||"";
+      active.classList.remove("torn-off");
+    }else{
+      document.getElementById("wrapper").style.opacity="0";
+      final.style.opacity="1";
+    }
+
+  },700);
+
+});
+</script>
+
+</body>
+</html>

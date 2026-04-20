@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masal Gibi | Mektuplar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --paper-color: #fdf5e6;
+            --blood-red: #8a2a2a;
+            --text-dark: #2c1e14;
+            --bg-dark: #121212;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: var(--bg-dark); 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            font-family: 'Playfair Display', serif; 
+        }
+
+        /* KAN EFEKTİ - Daha Dramatik Bir Katman */
+        #blood-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, rgba(138, 42, 42, 0.4) 0%, rgba(20, 0, 0, 0.9) 100%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #pain-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff4d4d;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 101;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            text-align: center;
+            letter-spacing: 2px;
+            filter: blur(1px);
+        }
+        
+        .notes-wrapper { 
+            position: relative; 
+            width: 90vw;      
+            max-width: 420px; 
+            height: 60vh;     
+            perspective: 1200px;
+            transition: filter 1s ease;
+        }
+        
+        .sheet { 
+            position: absolute; 
+            inset: 0; 
+            background: var(--paper-color); 
+            padding: 40px;    
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            cursor: pointer;
+            border-radius: 3px;
+            transform-origin: top center;
+            transition: transform 1.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.8s;
+            /* Kağıt Dokusu */
+            background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+        }
+
+        .sheet.bloody {
+            background-color: #f4e4e4;
+            border: 2px solid rgba(138, 42, 42, 0.2);
+        }
+        
+        .pin { 
+            position: absolute; 
+            top: 15px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 14px; 
+            height: 14px; 
+            background: var(--blood-red); 
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
+        
+        .text { 
+            color: var(--text-dark); 
+            line-height: 1.8; 
+            font-size: 1.2rem; 
+            font-style: italic; 
+            user-select: none;
+        }
+        
+        /* MEKTUBUN YUKARI UÇMA EFEKTİ */
+        .torn-off { 
+            transform: translateY(-130vh) rotate(-15deg) scale(0.8) !important; 
+            opacity: 0 !important; 
+            pointer-events: none; 
+        }
+        
+        #final-text { 
+            position: absolute; 
+            color: #b59b7c; 
+            font-size: 2.2rem; 
+            opacity: 0; 
+            text-align: center; 
+            width: 80%;
+            z-index: 10;
+            transition: opacity 3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="blood-overlay"></div>
+    <div id="pain-text">Dur... Canımı acıtıyorsun.</div>
+
+    <audio id="seda" src="assets/audio/seda.mp3" preload="auto" loop></audio>
+    <div id="final-text">Daima masal gibi kal...</div>
+
+    <div class="notes-wrapper" id="wrapper">
+        <div class="sheet" id="sheet-bg">
+            <div class="pin"></div>
+            <div class="text" id="t-next"></div>
+        </div>
+        
+        <div class="sheet" id="sheet-active" style="z-index: 2;">
+            <div class="pin"></div>
+            <div class="text" id="t-active"></div>
+        </div>
+    </div>
+
+    <script>
+        const content = [
+            { text: "Sana söyleyemediğim her şeyi bu eskitme kağıtlara hapsettim.", type: 'normal' },
+            { text: "Bazı yaralar dokundukça kanar, tıpkı bu mektup gibi...", type: 'blood' },
+            { text: "Her dokunuşunda içimden bir parçanın koptuğunu hissediyorum.", type: 'blood' },
+            { text: "Sana veda ederken içimdeki o ölümsüz masalı da öldürdüm.", type: 'blood' },
+            { text: "Artık serbestsin. Elveda.", type: 'normal' }
+        ];
+
+        let i = 0;
+        let bloodLevel = 0;
+        let isLocked = false;
+        let musicInited = false;
+
+        const sActive = document.getElementById('sheet-active');
+        const tActive = document.getElementById('t-active');
+        const tNext = document.getElementById('t-next');
+        const bloodOverlay = document.getElementById('blood-overlay');
+        const painText = document.getElementById('pain-text');
+        const music = document.getElementById('seda');
+
+        updateUI();
+
+        function updateUI() {
+            if (i < content.length) {
+                tActive.innerText = content[i].text;
+                content[i].type === 'blood' ? sActive.classList.add('bloody') : sActive.classList.remove('bloody');
+                
+                if (i + 1 < content.length) {
+                    tNext.innerText = content[i+1].text;
+                    content[i+1].type === 'blood' ? document.getElementById('sheet-bg').classList.add('bloody') : document.getElementById('sheet-bg').classList.remove('bloody');
+                } else {
+                    tNext.innerText = "";
+                    document.getElementById('sheet-bg').style.opacity = "0";
+                }
+            }
+        }
+
+        sActive.addEventListener('click', () => {
+            if (isLocked || i >= content.length) return;
+
+            // Müzik ilk tıkla başlasın (Sessiz)
+            if (!musicInited) {
+                music.volume = 0;
+                music.play().catch(() => {});
+                musicInited = true;
+            }
+
+            // KAN MEKANİZMASI
+            if (content[i].type === 'blood') {
+                bloodLevel++;
+                bloodOverlay.style.opacity = (bloodLevel * 0.33);
+
+                if (bloodLevel >= 3) {
+                    isLocked = true;
+                    painText.style.opacity = "1";
+                    
+                    // İyileşme periyodu
+                    setTimeout(() => {
+                        bloodOverlay.style.transition = "opacity 4s ease-in-out";
+                        bloodOverlay.style.opacity = "0";
+                        
+                        setTimeout(() => {
+                            isLocked = false;
+                            bloodLevel = 0;
+                            painText.style.opacity = "0";
+                            bloodOverlay.style.transition = "opacity 0.6s ease";
+                        }, 4000);
+                    }, 2000);
+                    return; 
+                }
+            } else {
+                bloodLevel = 0;
+                bloodOverlay.style.opacity = "0";
+            }
+
+            // MEKTUP UÇUŞU
+            sActive.classList.add('torn-off');
+
+            setTimeout(() => {
+                i++;
+                if (i < content.length) {
+                    updateUI();
+                    sActive.style.transition = 'none';
+                    sActive.classList.remove('torn-off');
+                    setTimeout(() => {
+                        sActive.style.transition = 'transform 1.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.8s';
+                    }, 50);
+                } else {
+                    // FİNAL
+                    document.getElementById('wrapper').style.opacity = "0";
+                    setTimeout(() => {
+                        document.getElementById('wrapper').style.display = "none";
+                        const final = document.getElementById('final-text');
+                        final.style.opacity = "1";
+                        
+                        // Müzik sesi kademeli yükselsin
+                        let vol = 0;
+                        const interval = setInterval(() => {
+                            if (vol < 0.5) {
+                                vol += 0.05;
+                                music.volume = vol;
+                            } else {
+                                clearInterval(interval);
+                            }
+                        }, 200);
+                    }, 1000);
+                }
+            }, 800);
+        });
+    </script>
+</body>
+</html>
