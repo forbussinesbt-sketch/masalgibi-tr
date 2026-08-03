@@ -1,0 +1,13 @@
+<svg viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Çekim seti iç mekan görseli">
+  <defs>
+    <linearGradient id="g5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#efe2cf"/>
+      <stop offset="100%" stop-color="#a98f6c"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="900" fill="url(#g5)"/>
+  <rect x="80" y="500" width="640" height="10" fill="#2a2421" opacity="0.2"/>
+  <circle cx="400" cy="350" r="90" fill="#2a2421" opacity="0.12"/>
+  <line x1="400" y1="440" x2="400" y2="620" stroke="#2a2421" stroke-opacity="0.25" stroke-width="6"/>
+  <line x1="330" y1="620" x2="470" y2="620" stroke="#2a2421" stroke-opacity="0.25" stroke-width="6"/>
+</svg>

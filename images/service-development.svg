@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Development thumbnail">
+  <rect width="120" height="120" fill="#38a169"/>
+  <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M42 40 22 60l20 20M78 40l20 20-20 20M66 32 54 88"/>
+  </g>
+</svg>

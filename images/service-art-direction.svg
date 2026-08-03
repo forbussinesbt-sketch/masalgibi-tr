@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Art direction thumbnail">
+  <rect width="120" height="120" fill="#1a202c"/>
+  <g stroke="#ffffff" stroke-opacity="0.85" stroke-width="3" fill="none">
+    <circle cx="44" cy="46" r="22"/>
+    <rect x="54" y="56" width="42" height="42"/>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Digital design thumbnail">
+  <rect width="120" height="120" fill="#1a202c"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3">
+    <rect x="18" y="18" width="84" height="60"/>
+    <path d="M18 40h84M40 90h40M60 78v12"/>
+  </g>
+</svg>
